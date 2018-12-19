@@ -29,17 +29,16 @@ app.post('/scrape', bodyParser.json(), async (req, res) => {
     console.log(`Scraping ${url}`);
     const requestOpts = Object.assign({}, DEFAULT_REQUEST_OPTIONS, { timeout, url });
     const {
-      request: { _rp_options: { url }, href: finalURL },
+      request: { href: finalURL },
       body,
       statusCode,
       timings: { end: responseTime },
     } = await request(requestOpts);
 
-    // process scripts for final html
+    // process scripts for final html of scraped content
     const jsdomOpts = Object.assign({}, DEFAULT_JSDOM_OPTIONS, { url: finalURL });
     const dom = new JSDOM(body, jsdomOpts);
     const content = dom.serialize();
-    console.log(`Found content length: ${content.length}`);
     dom.window.close();
     res.json({
       content,
@@ -49,6 +48,7 @@ app.post('/scrape', bodyParser.json(), async (req, res) => {
       url,
     });
   } catch (error) {
+    console.log(`Error: ${error}`);
     res.status(500).json({ error });
   }
 });
